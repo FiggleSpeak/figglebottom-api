@@ -2,4 +2,4 @@ Flask
 Gunicorn
 datasets
 transformers
-pytorch
+torch
