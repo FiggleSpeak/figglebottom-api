@@ -3,6 +3,11 @@ Gunicorn
 datasets
 transformers[torch]
 wheel
-phonemizer
 python-dotenv
 ffmpeg
+soundfile
+sox
+phonemizer
+g2p==1.1.20230822 
+minineedle
+networkx
