@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 import base64
 import random
 import uuid
@@ -16,6 +17,7 @@ from phonemizer.backend.espeak.wrapper import EspeakWrapper
 from transformers import AutoProcessor, AutoModelForCTC
 
 app = Flask(__name__)
+CORS(app)
 
 
 processor = AutoProcessor.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-ft", token="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")
@@ -260,4 +262,6 @@ def score_user():
 
 
     
-    
+if __name__ == '__main__':
+    app.run(port=4000)
+

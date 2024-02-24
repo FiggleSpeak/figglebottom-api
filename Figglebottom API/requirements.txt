@@ -11,3 +11,4 @@ phonemizer
 g2p==1.1.20230822 
 minineedle
 networkx
+flask-cors
