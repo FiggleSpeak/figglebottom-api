@@ -1,22 +1,23 @@
 from flask import Flask, request
 import base64
 import random
-import os
-import platform
 
-import torch
+
 import torchaudio
+import torch
+
+
+from phonemizer.backend.espeak.wrapper import EspeakWrapper
 
 from transformers import AutoProcessor, AutoModelForCTC
 
-from dotenv import load_dotenv
-
-load_dotenv(".env")
-
-
-HF_TOKEN = os.getenv("HF_TOKEN", "")
-
 app = Flask(__name__)
+
+EspeakWrapper.set_library('C:\\Program Files\\eSpeak NG\\libespeak-ng.dll')
+
+processor = AutoProcessor.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token="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")
+model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token="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")
+
 
 @app.route('/')
 def hello_world():
@@ -26,10 +27,7 @@ def hello_world():
 @app.route('/evaluate_user', methods=['POST'])
 def score_user():
     served_text = request.form.get('served_text')
-    user_audio = request.form.get('user_audio')
-    if platform.system().lower() == "windows":
-        from phonemizer.backend.espeak.wrapper import EspeakWrapper
-        EspeakWrapper.set_library('C:\\Program Files\\eSpeak NG\\libespeak-ng.dll')
+    user_audio = request.form.get('user_audio') 
 
     var = random.randint(0, 100000)
     
@@ -41,12 +39,8 @@ def score_user():
 
         
     print("sss")
-    
-    # tokenize
-    processor = AutoProcessor.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token=HF_TOKEN)
-    model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token=HF_TOKEN)
+ # tokenize
     input_values = processor(torchaudio.load("user_audio_" + str(var) + ".wav")[0].squeeze(), return_tensors="pt", sampling_rate=16000).input_values
-
 
     # retrieve logits
     with torch.no_grad():
@@ -58,3 +52,6 @@ def score_user():
     print(transcription)
 
     return('92racks')
+
+    
+    
