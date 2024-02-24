@@ -1,6 +1,8 @@
 from flask import Flask, request
 import base64
 import random
+import uuid
+import os
 
 
 import torchaudio
@@ -16,8 +18,8 @@ from transformers import AutoProcessor, AutoModelForCTC
 app = Flask(__name__)
 
 
-processor = AutoProcessor.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token="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")
-model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-lv-60-espeak-cv-ft", token="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")
+processor = AutoProcessor.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-ft", token="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")
+model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-ft", token="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")
 
 
 # thanks to: https://github.com/chdzq/ARPAbetAndIPAConvertor/
@@ -60,7 +62,7 @@ class Phoneme:
 
 phonemes = [Phoneme(arpabet='AA', american='a',  english='ɑ:', ipa='ɑ',  is_vowel=True),
             Phoneme(arpabet='AE', american='æ',  english='æ',  ipa='æ',  is_vowel=True),
-            Phoneme(arpabet='AH', american='ʌ',  english='ʌ',  ipa='ʌ',  is_vowel=True),
+            Phoneme(arpabet='AH', american='ʌ',  english='ʌ',  ipa='ɐ',  is_vowel=True),
             Phoneme(arpabet='AO', american='ɔ',  english='ɔ:', ipa='ɔ',  is_vowel=True),
             Phoneme(arpabet='AW', american='aʊ', english='aʊ', ipa='aʊ', is_vowel=True),
             Phoneme(arpabet='AX', american='ə',  english='ə',  ipa='ə',  is_vowel=True),
@@ -125,11 +127,22 @@ def IPAtoARPA(phoneme_arr):
     # if string like transcription, convert into arr
     if len(phoneme_arr) == 1:
         phoneme_arr = phoneme_arr[0].split(" ")
+    
+    res = []
+    for ipa in phoneme_arr:
+        ipa_fixed = ipa.replace('ː',":")
+        if ipa_fixed in IPAtoARPAdict:
+            res.append(IPAtoARPAdict[ipa_fixed])
+        else:
+            res.append(IPAtoARPAdict.get(ipa_fixed.replace(':', ''), ''))
+    return res
 
-    return [IPAtoARPAdict[ipa.replace('ː',":")] for ipa in phoneme_arr]
-
-def IPAtoARPAchar(char):
-    return IPAtoARPAdict.get(char, '')
+def IPAtoARPAchar(c):
+    ipa_fixed = c.replace('ː',":")
+    if ipa_fixed in IPAtoARPAdict:
+        return IPAtoARPAdict.get(ipa_fixed)
+    else:
+        return IPAtoARPAdict.get(ipa_fixed.replace(':', ''), '')
 
 @app.route('/')
 def hello_world():
@@ -138,23 +151,21 @@ def hello_world():
 
 @app.route('/evaluate_user', methods=['POST'])
 def score_user():
-    served_text = request.form.get('served_text')
-    user_audio = request.form.get('user_audio') 
 
-    var = random.randint(0, 100000)
-    
-    decoded = base64.b64decode(user_audio)
-    
-    # with open("user_audio_" + str(var) + ".wav", "wb") as fo:
-    #     fo.write(decoded)
-    #     fo.close()
+    audio_file = request.files['audio']
+    sentence = request.form['sentence']
 
-    wav_file_bytesIO = BytesIO(decoded)
+    audio_path = 'uploads/' + str(uuid.uuid4())
 
+    audio_file.save(audio_path)
         
+    wav_path = audio_path + '.wav'
+    os.popen(f'ffmpeg -i {audio_path} -c:a pcm_f32le {wav_path}').read()
+    os.remove(audio_path)
+
     print("sss")
  # tokenize
-    input_values = processor(torchaudio.load(wav_file_bytesIO)[0].squeeze(), return_tensors="pt", sampling_rate=16000).input_values
+    input_values = processor(torchaudio.load(wav_path)[0].squeeze(), return_tensors="pt", sampling_rate=16000).input_values
 
     # retrieve logits
     with torch.no_grad():
@@ -167,7 +178,7 @@ def score_user():
     
     from g2p import make_g2p
     transducer = make_g2p('eng', 'eng-ipa')
-    t = transducer(served_text) # here is where we put the given text
+    t = transducer(sentence) # here is where we put the given text
 
 
     ############################## PART 3: MATCHING PHONEMES AND GETTING INCORRECT GRAPHEMES
@@ -240,9 +251,12 @@ def score_user():
         else:
             letters.append('['+new_p2g[j][1]+']')
         j=j+1
+    
 
+    os.remove(wav_path)
+    print("".join(letters))
 
-    return("".join(letters))
+    return "".join(letters)
 
 
     
