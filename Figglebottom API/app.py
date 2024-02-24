@@ -162,7 +162,7 @@ def score_user():
     audio_file.save(audio_path)
         
     wav_path = audio_path + '.wav'
-    os.popen(f'ffmpeg -i {audio_path} -c:a pcm_f32le {wav_path}').read()
+    os.popen(f'ffmpeg -i {audio_path} -c:a pcm_f32le -ar 16000 {wav_path}').read()
     os.remove(audio_path)
 
     print("sss")
@@ -241,24 +241,28 @@ def score_user():
     # print(" ".join(al2))
 
     correct_seq, actual_seq = alignment.get_aligned_sequences(core.AlignmentFormat.list)
+    print(correct_seq)
+    print(actual_seq)
 
-    letters = []
+    words = [[]]
     j = 0
 
     for i in range(len(correct_seq)):
         if type(correct_seq[i]) == core.Gap:
             continue
-        if correct_seq[i] == actual_seq[i] or new_p2g[j][1] == ' ':
-            letters.append(new_p2g[j][1])
+        if new_p2g[j][1] == ' ':
+            words.append([])
+        elif correct_seq[i] == actual_seq[i]:
+            words[-1].append(1)
         else:
-            letters.append('['+new_p2g[j][1]+']')
+            words[-1].append(0)
         j=j+1
     
 
     os.remove(wav_path)
-    print("".join(letters))
 
-    return "".join(letters)
+    print(words)
+    return words
 
 
     
