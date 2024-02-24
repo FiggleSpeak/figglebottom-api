@@ -6,6 +6,9 @@ ENV PYTHONUNBUFFERED True
 
 # Install eSpeak-NG
 RUN apt-get update && apt-get install -y espeak-ng
+RUN apt-get update && apt-get install -y sox
+RUN apt-get update && apt-get install -y ffmpeg
+
 
 # Install pytorch
 RUN python3.10 -m pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -24,6 +27,3 @@ COPY . .
 # For environments with multiple CPU cores, increase the number of workers
 # to be equal to the cores available.
 CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
-
-
-
