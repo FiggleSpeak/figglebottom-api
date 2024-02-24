@@ -5,3 +5,4 @@ transformers[torch]
 wheel
 phonemizer
 python-dotenv
+ffmpeg
