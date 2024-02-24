@@ -1,5 +1,7 @@
 Flask
 Gunicorn
 datasets
-transformers
-torch
+transformers[torch]
+wheel
+phonemizer
+python-dotenv
