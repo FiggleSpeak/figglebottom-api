@@ -1,7 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
-import base64
-import random
+import string
 import uuid
 import os
 
@@ -261,16 +260,18 @@ def score_user():
 
     os.remove(wav_path)
 
-    word_idx = 0
-    char_idx = 0
+    if len(words) < len(sentence.split(' ')):
+        for i in range(len(words), len(sentence.split(' '))):
+            words.append([0]*len(sentence.split(' ')[i]))
 
-    for c in t.input_string:
-        if c in '.?!,"\'':
-            words[word_idx][char_idx] = 1
-        char_idx += 1
-        if char_idx >= len(words[word_idx]):
-            char_idx = 0
-            word_idx += 1
+    for i, word in enumerate(sentence.split(' ')):
+        diff = len(word) - len(words[i])
+        if diff > 0:
+            words[i].extend([0]*diff)
+        for j, c in enumerate(word):
+            # punctuation is always correct
+            if c not in string.ascii_letters:
+                words[i][j] = 1
 
     print(words)
     return words
