@@ -289,7 +289,7 @@ def score_user():
     j = 0
 
     for i in range(len(correct_seq)):
-        if type(correct_seq[i]) == core.Gap:
+        if type(correct_seq[i]) == core.Gap or correct_seq[i]=="":
             continue
         if new_p2g[j][1] == ' ':
             words.append([])
