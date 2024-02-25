@@ -3,6 +3,7 @@ from flask_cors import CORS
 import string
 import uuid
 import os
+import re
 
 
 import torchaudio
@@ -259,7 +260,7 @@ def score_user():
         # if new_p2g[i][1] == ' ':
         #     continue
         if t.input_string[og_text_idx] != new_p2g[i][1][0]:
-            while t.input_string[og_text_idx] != new_p2g[i+1][1][0]:
+            while i+1 < len(new_p2g) and t.input_string[og_text_idx] != new_p2g[i+1][1][0]:
                 new_p2g[i][1] += t.input_string[og_text_idx]
                 og_text_idx += 1
             new_p2g[i][1] = new_p2g[i][1][1:]
