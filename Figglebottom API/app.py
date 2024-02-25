@@ -292,13 +292,17 @@ def score_user():
         if type(correct_seq[i]) == core.Gap or correct_seq[i]=="":
             continue
         if new_p2g[j][1] == ' ':
+            if len(pronunciation_tips[-1]) == 0:
+                pronunciation_tips[-1].append('Sorry, we don\'t have tips for this word yet!')
             words.append([])
             pronunciation_tips.append([])
         elif correct_seq[i] == actual_seq[i]:
             words[-1].extend([1]*len(new_p2g[j][1]))
         else:
             words[-1].extend([0]*len(new_p2g[j][1]))
-            pronunciation_tips[-1].append(corrections.get(f'/{ARPAtoIPAchar(correct_seq[i])}/', 'Sorry, no tips yet!'))
+            tip = corrections.get(f'/{ARPAtoIPAchar(correct_seq[i])}/')
+            if tip is not None:
+                pronunciation_tips[-1].append(tip)
 
         j=j+1
     
@@ -319,7 +323,7 @@ def score_user():
                 words[i][j] = 1
 
     print(words)
-    return words, pronunciation_tips
+    return [words, pronunciation_tips]
 
 
     
