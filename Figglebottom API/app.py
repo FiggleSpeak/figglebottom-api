@@ -259,6 +259,8 @@ def score_user():
         # if new_p2g[i][1] == ' ':
         #     continue
         if sentence[og_text_idx] != new_p2g[i][1][0] and i-1 < len(new_p2g):
+            if len(new_p2g[i+1]) < 2: # please fix the error please pleas epl
+                continue
             while sentence[og_text_idx] != new_p2g[i+1][1][0]:
                 new_p2g[i][1] += sentence[og_text_idx]
                 og_text_idx += 1
