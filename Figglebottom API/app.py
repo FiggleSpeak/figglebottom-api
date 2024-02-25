@@ -319,7 +319,7 @@ def score_user():
                 words[i][j] = 1
 
     print(words)
-    return words
+    return words, pronunciation_tips
 
 
     
