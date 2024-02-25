@@ -261,6 +261,17 @@ def score_user():
 
     os.remove(wav_path)
 
+    word_idx = 0
+    char_idx = 0
+
+    for c in t.input_string:
+        if c in '.?!,"\'':
+            words[word_idx][char_idx] = 1
+        char_idx += 1
+        if char_idx >= len(words[word_idx]):
+            char_idx = 0
+            word_idx += 1
+
     print(words)
     return words
 
