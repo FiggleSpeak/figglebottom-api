@@ -258,14 +258,14 @@ def score_user():
     for i in range(len(new_p2g)):
         # if new_p2g[i][1] == ' ':
         #     continue
-        if t.input_string[og_text_idx] != new_p2g[i][1][0]:
-            while t.input_string[og_text_idx] != new_p2g[i+1][1][0]:
-                new_p2g[i][1] += t.input_string[og_text_idx]
+        if sentence[og_text_idx] != new_p2g[i][1][0] and i-1 < len(new_p2g):
+            while sentence[og_text_idx] != new_p2g[i+1][1][0]:
+                new_p2g[i][1] += sentence[og_text_idx]
                 og_text_idx += 1
             new_p2g[i][1] = new_p2g[i][1][1:]
         else:
             og_text_idx += 1
-        if og_text_idx >= len(t.input_string):
+        if og_text_idx >= len(sentence):
             break
 
 
@@ -306,6 +306,9 @@ def score_user():
 
         j=j+1
     
+    for word_tips in pronunciation_tips:
+        if len(word_tips) > 0 and all([x == "" for x in word_tips]):
+            word_tips = ["Sorry, we don't have tips for this word yet!"]
 
     os.remove(wav_path)
 
