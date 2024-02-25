@@ -256,11 +256,9 @@ def score_user():
     og_text_idx += 1
 
     for i in range(len(new_p2g)):
-        if new_p2g[i][0] == '':
-            continue
-        if t.input_string[og_text_idx] != new_p2g[i][1][0] and i-1 < len(new_p2g):
-            if len(new_p2g[i+1]) < 2: # please fix the error please pleas epl
-                continue
+        # if new_p2g[i][1] == ' ':
+        #     continue
+        if t.input_string[og_text_idx] != new_p2g[i][1][0]:
             while t.input_string[og_text_idx] != new_p2g[i+1][1][0]:
                 new_p2g[i][1] += t.input_string[og_text_idx]
                 og_text_idx += 1
