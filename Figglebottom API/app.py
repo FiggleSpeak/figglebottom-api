@@ -252,9 +252,10 @@ def score_user():
         if new_p2g[j][1] == ' ':
             words.append([])
         elif correct_seq[i] == actual_seq[i]:
-            words[-1].append(1)
+
+            words[-1].extend([1]*len(new_p2g[j][1]))
         else:
-            words[-1].append(0)
+            words[-1].extend([0]*len(new_p2g[j][1]))
         j=j+1
     
 
