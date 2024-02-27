@@ -4,6 +4,8 @@ import os
 import torch
 import torchaudio
 
+from typing import Optional
+
 from dotenv import load_dotenv
 load_dotenv(".env")
 
@@ -13,7 +15,17 @@ processor = AutoProcessor.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-f
 model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-ft", token=HF_TOKEN)
 
 
-def convert_to_wav(audio_path, wav_path = None, delete = True) -> str:
+def convert_to_wav(audio_path: str, wav_path: Optional[str] = None, delete: bool = True) -> str:
+    """Converts a normal audio file (typically MPEG) into a .wav file using FFMPEG.
+
+    Args:
+        audio_path (str): Path to original (mp3) file
+        wav_path (str, optional): Path to save wav file. Defaults to "{audio_path}.wav".
+        delete (bool, optional): Whether to delete the original file or not. Defaults to True.
+
+    Returns:
+        str: The new wav file path. It will be the same as wav_path if provided.
+    """
     if wav_path is None:
         wav_path = audio_path + ".wav"
         
@@ -25,13 +37,22 @@ def convert_to_wav(audio_path, wav_path = None, delete = True) -> str:
     return wav_path
     
     
+def _load_audio(wav_path: str) -> torch.Tensor:
+    """Loads audio waveform from wav file and returns as PyTorch Tensor.
+    Note: sampling rate is NOT returned
 
-def load_audio(wav_path: str) -> torch.Tensor:
+    Args:
+        wav_path (str): Path to wav file
+
+    Returns:
+        torch.Tensor: Tensor containing audio in wav file
+    """
     waveform, _sr = torchaudio.load(wav_path)
     return waveform.squeeze()
 
+
 def transcribe(wav_path: str):
-    audio = load_audio(wav_path)
+    audio = _load_audio(wav_path)
     
     input_values = processor(audio, return_tensors="pt", sampling_rate=16000).input_values
     
