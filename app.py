@@ -5,13 +5,15 @@ import string
 import uuid
 import os
 
-from minineedle import needle, core
+from minineedle.needle import NeedlemanWunsch
+from minineedle.core import Gap, AlignmentFormat
+
 from g2p import make_g2p
 
 from dotenv import load_dotenv
 load_dotenv(".env")
 
-from phoneme import IPAtoARPAchar, IPAtoARPA, get_correction
+from phoneme import IPAtoARPAchar, IPAtoARPA, get_correction, ARPA
 from transcribe import transcribe, convert_to_wav
 
 
@@ -46,28 +48,20 @@ def score_user():
     #### PART 3: MATCHING PHONEMES AND GETTING INCORRECT GRAPHEMES
     curr_phoneme = "XX"
 
-    phoneme_to_grapheme = [(IPAtoARPAchar(b),a) for (a,b) in t.pretty_edges()]
-    new_p2g = []
-    old_p2g = []
+    phoneme_to_grapheme: list[tuple[ARPA, str]] = [(IPAtoARPAchar(b),a) for (a,b) in t.pretty_edges()]
+    new_p2g: list[tuple[ARPA, str]] = []
+    old_p2g: list[tuple[ARPA, str]] = []
 
 
     for i in range(len(t.pretty_edges())):
         if curr_phoneme != phoneme_to_grapheme[i][0]:
             curr_phoneme = phoneme_to_grapheme[i][0]
-            if phoneme_to_grapheme[i][1] == phoneme_to_grapheme[i-1][1]:
-                continue
-            else:
+            if phoneme_to_grapheme[i][1] != phoneme_to_grapheme[i-1][1]:
                 new_p2g.append(list(phoneme_to_grapheme[i]))
                 old_p2g.append(list(phoneme_to_grapheme[i]))
-        # else:
-        #     new_p2g[-1][1] += phoneme_to_grapheme[i][1]
 
     s = ""
     og_text_idx = 0
-    
-    # for text in t.input_string:
-    #     if text == new_p2g[0][1][-1]: break
-    #     s += text
     
     while t.input_string[og_text_idx] != new_p2g[0][1][-1]:
         s += t.input_string[og_text_idx]
@@ -92,19 +86,12 @@ def score_user():
         if og_text_idx >= len(t.input_string):
             break
 
+    input_phonemes = [a[0] for a in new_p2g]
 
-    alignment: needle.NeedlemanWunsch[list] = needle.NeedlemanWunsch([a[0] for a in new_p2g], IPAtoARPA(transcribed_phonemes))
+    alignment: NeedlemanWunsch[list] = NeedlemanWunsch(input_phonemes, IPAtoARPA(transcribed_phonemes))
     alignment.align()
 
-    # print(alignment)
-
-    # al1, al2 = alignment.get_aligned_sequences(core.AlignmentFormat.list) # or "list"
-
-    # al1.replace
-    # print(" ".join(al1))
-    # print(" ".join(al2))
-
-    correct_seq, actual_seq = alignment.get_aligned_sequences(core.AlignmentFormat.list)
+    correct_seq, actual_seq = alignment.get_aligned_sequences(AlignmentFormat.list)
     print(correct_seq)
     print(actual_seq)
 
@@ -113,7 +100,7 @@ def score_user():
     j = 0
 
     for i in range(len(correct_seq)):
-        if type(correct_seq[i]) == core.Gap or correct_seq[i] == "":
+        if type(correct_seq[i]) == Gap or correct_seq[i] == "":
             continue
         if new_p2g[j][1] == ' ':
             if len(pronunciation_tips[-1]) == 0:
