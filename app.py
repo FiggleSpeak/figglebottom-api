@@ -129,7 +129,7 @@ def score_user():
         if diff > 0:
             words[i].extend([0]*diff)
         for j, c in enumerate(word):
-            # punctuation is always correct
+            # assume that punctuation is always correct
             if c not in string.ascii_letters:
                 words[i][j] = 1
 

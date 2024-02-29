@@ -16,7 +16,7 @@ model = AutoModelForCTC.from_pretrained("facebook/wav2vec2-xlsr-53-espeak-cv-ft"
 
 
 def convert_to_wav(audio_path: str, wav_path: Optional[str] = None, delete: bool = True) -> str:
-    """Converts a normal audio file (typically MPEG) into a .wav file using FFMPEG.
+    """Converts a normal audio file (typically MPEG or WebM) into a .wav file using FFMPEG.
 
     Args:
         audio_path (str): Path to original (mp3) file
