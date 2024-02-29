@@ -21,8 +21,7 @@ RUN python3.10 -m pip install -r requirements.txt
 
 #Copy files over into root directory
 COPY . .
-
-CMD mkdir uploads
+RUN mkdir uploads
 
 # Run the web service on container startup. 
 # Use gunicorn webserver with one worker process and 8 threads.
